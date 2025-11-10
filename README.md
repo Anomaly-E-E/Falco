@@ -47,10 +47,3 @@ It analyzes your code for potential security flaws like **SQL Injection**, **XSS
 </div>
 
 ---
-
-## ⚙️ Setup Guide
-
-### 🧾 1. Clone the Repository
-```bash
-git clone https://github.com/<yourusername>/falco.git
-cd falco
