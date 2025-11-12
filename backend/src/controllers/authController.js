@@ -130,7 +130,7 @@ async function verifyEmail(req, res) {
     //Get token from request
     const { token } = req.body;
     console.log('📧 Email verification attempt');
-    console.log(token ? token.substring(0, 10) + '*****' : 'MISSING');
+    console.log(token ? token.substring(0, 10) + '....' : 'MISSING');
     
     //Validate token
     if (!token) {
