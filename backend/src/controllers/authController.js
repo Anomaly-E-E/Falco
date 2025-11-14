@@ -1,5 +1,5 @@
 const { supabase } = require('../config/supabase');
-const { hashPassword } = require('../utils/password');
+const { hashPassword, comparePassword } = require('../utils/password');
 const { isValidEmail, isValidPassword, sanitizeEmail } = require('../utils/validation');
 const { generateToken, generateVerificationToken } = require('../utils/jwt');
 const { sendVerificationEmail } = require('../services/emailService');
@@ -202,7 +202,105 @@ async function verifyEmail(req, res) {
   }
 }
 
+/**
+ * LOGIN FUNCTION
+ * 
+ * 1. Get email and password from request
+ * 2. Validate both fields exist
+ * 3. Sanitize email
+ * 4. Find user by email in database
+ * 5. Check if user exists
+ * 6. Check if email is verified
+ * 7. Compare password with hashed password
+ * 8. Generate JWT token
+ * 9. Send token and user data back
+ */
+
+async function login(req, res) {
+  try {
+    // Get email and password from request
+    const {email, password} = req.body;
+    console.log('🔐 Login attempt for:', email);
+    
+    //Validate both fields exist
+   if (!email || !password) {
+      return res.status(400).json({ 
+        error: 'Email and password are required' 
+      });
+    }
+    
+    // Sanitize email (remove spaces, lowercase)
+    const cleanEmail = sanitizeEmail(email);
+    
+    
+   //Find user by email in database
+   const { data: user, error: findError } = await supabase
+    .from('users')
+    .select('id, email, password_hash, is_verified, credits')   
+    .eq('email', cleanEmail)
+    .single();
+
+   //Check if user exists
+   if (findError || !user) {
+    console.log('❌ User not found:', cleanEmail);
+    return res.status(401).json({ 
+      error: 'Invalid email or password' 
+    });
+   }
+    
+    
+   //Check if verified
+    if (!user.is_verified) {
+      console.log('⚠️ Unverified account:', user.email);
+      return res.status(403).json({ 
+        error: 'Please verify your email before logging in. Check your inbox.' 
+      });
+    }
+    
+    
+    //Compare passwords
+    const isPasswordValid = await comparePassword(password, user.password_hash);
+    if (!isPasswordValid) {     
+      console.log('❌ Invalid password for:', user.email);
+      return res.status(401).json({ 
+        error: 'Invalid email or password' 
+      });
+    }
+
+   console.log('✅ Password valid for:', user.email)
+    
+    
+    //Generate JWT token
+    const token = generateToken({ 
+      userId: user.id,
+      email: user.email 
+    });
+    console.log('🎫 Token generated for:', user.email);
+    
+    
+    //Send response
+    res.status(200).json({
+      message: 'Login successful!',
+      token: token,
+      user: {
+        id: user.id,
+        email: user.email,
+        credits: user.credits,
+        isVerified: user.is_verified
+      }
+    });
+    
+    
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).json({ 
+      error: 'An error occurred during login' 
+    });
+  }
+}
+
 module.exports = {
   register,
-  verifyEmail
+  verifyEmail,
+  login
 };
