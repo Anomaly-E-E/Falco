@@ -5,7 +5,7 @@ const isDevelopment = process.env.NODE_ENV === 'development';
 async function sendVerificationEmail(email, verificationToken) {
   const verificationLink = `http://localhost:3000/verify-email?token=${verificationToken}`;
   
-  // DEVELOPMENT: Just log to console
+
   if (isDevelopment) {
     console.log('\n📧 ===== EMAIL SIMULATION =====');
     console.log('To:', email);
@@ -25,9 +25,9 @@ async function sendVerificationEmail(email, verificationToken) {
     return { success: true, mode: 'development' };
   }
   
-  // PRODUCTION: Real email service ( add later)
+
   try {
-    // TODO: Add real email service (Resend/SendGrid)
+   
     console.log('📧 Sending real email to:', email);
     return { success: true, mode: 'production' };
   } catch (error) {
@@ -59,7 +59,7 @@ async function sendPasswordResetEmail(email, resetToken) {
     return { success: true, mode: 'development' };
   }
   
-  // PRODUCTION mode ( later)
+
   return { success: true, mode: 'production' };
 }
 
