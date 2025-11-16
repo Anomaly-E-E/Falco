@@ -1,3 +1,4 @@
+require('dotenv').config();
 //Analyze code for security vulnerabilities using OpenAI API
 
 const OpenAI = require('openai');
@@ -50,6 +51,11 @@ function detectLanguage(code) {
     return 'unknown';
   }
 
+
+
 module.exports = {
-    detectLanguage
+  detectLanguage,
+  
 };
+
+
