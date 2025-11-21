@@ -1,19 +1,4 @@
-/**
- * AUTH MIDDLEWARE
- * 
- * PURPOSE: Protect routes - only logged-in users can access
- * 
- * STEP-BY-STEP FLOW:
- * 1. Get Authorization header from request
- * 2. Check if token exists in header
- * 3. Extract token from "Bearer <token>" format
- * 4. Verify token is valid (not expired, not tampered)
- * 5. Extract user data from token (userId, email)
- * 6. Add user data to request object
- * 7. Allow request to continue (call next())
- * 
- * IF ANY STEP FAILS: Return 401 Unauthorized error
- */
+
 
 const { verifyToken } = require('../utils/jwt');
 
