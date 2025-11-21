@@ -53,8 +53,71 @@ async function analyzeScan(req, res){
 
         console.log(`User has ${user.credits} credits`);
 
-        
+        //Detect Language
+        const language = detectLanguage(code);
+        console.log('Detected language: ${language}');
 
+        if (language == 'unknown'){
+          return res.status(400).json({ 
+            error: 'Could not detect programming language. Supported: Python, JavaScript, Java, C/C++, PHP, Ruby, Go' 
+          });
+        }
+
+        //Analyze code with AI
+        console.log('Starting AI analysis...');
+        const vulnerabilities = await analyzeCode(code, language);
+        console.log(`Found ${vulnerabilities.length} vulnerabilities!!!`);
+
+        //Deduct 1 credit from user
+        const { data: updatedUser, error: updateError } = await supabase
+        .from('users')
+        .update({ credits: user.credits - 1 })
+        .eq('id', userId)
+        .eq('credits', user.credits)
+        .select('credits')
+        .single();
+
+        if ( updateError || !updateError){
+          consile.log('Failed to deduct credit:', updateError);
+          return res.status(500).json({
+            error: 'Failed to process scan. Credit not deducted.' 
+          })
+        }
+
+        console.log(`✅ Credit deducted. Remaining: ${updatedUser.credits}`);
+
+        const { data: scan, error: scanError} = await supabase
+        .from(scan)
+        .insert({
+            user_id: userId,
+            code_length: code.length,
+            language: language,
+            status: 'completed',
+            vulnerabilities_count: vulnerabilities.length,
+            scan_result: vulnerabilities
+          })
+          .select()
+          .single();
+
+          if (scanError) {
+            console.error('Failed to save scan:', scanError);
+          }
+          
+          console.log(`Scan saved with ID: ${scan?.id}`);
+          
+          //Return results
+          res.status(200).json({
+            message: 'Scan completed successfully',
+            scan: {
+              id: scan?.id,
+              language: language,
+              codeLength: code.length,
+              vulnerabilitiesCount: vulnerabilities.length,
+              vulnerabilities: vulnerabilities,
+              creditsRemaining: updatedUser.credits,
+              scannedAt: new Date().toISOString()
+            }
+          });
 
 
 
