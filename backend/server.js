@@ -6,6 +6,8 @@ const { testConnection } = require('./src/config/supabase');
 
 // Import routes
 const authRoutes = require('./src/routes/authRoutes');
+const scanRoutes = require('./src/routes/scanRoutes');
+
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -30,6 +32,8 @@ app.get('/health', (req, res) => {
 
 // Auth routes - ALL auth endpoints start with /api/auth
 app.use('/api/auth', authRoutes);
+app.use('/api/scans', scanRoutes);;
+
 
 // 404 handler
 app.use((req, res) => {

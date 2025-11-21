@@ -119,10 +119,6 @@ async function analyzeScan(req, res){
             }
           });
 
-
-
-
-
     }catch (error) {
         console.error('❌ Scan error:', error);
         res.status(500).json({ 
@@ -131,7 +127,53 @@ async function analyzeScan(req, res){
       }
 }
 
+async function getScanHistory(req, res) {
+  try{
+
+    const userId = req.user.userId;
+    console.log(`Fetching scan history for user: ${req.user.email}`);
+
+    // Query all scans for this user, ordered by newest first
+    const { data: scans, error } = await supabase
+      .from('scans')
+      .select('id, language, code_length, vulnerabilities_count, status, created_at')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false });
+    
+    if (error) {
+      console.error('Database error:', error);
+      return res.status(500).json({ 
+        error: 'Failed to fetch scan history' 
+      });
+    }
+    
+    console.log(`Found ${scans.length} scans`);
+    
+    // Return formatted response
+    res.status(200).json({
+      totalScans: scans.length,
+      scans: scans.map(scan => ({
+        id: scan.id,
+        language: scan.language,
+        codeLength: scan.code_length,
+        vulnerabilitiesCount: scan.vulnerabilities_count,
+        status: scan.status,
+        scannedAt: scan.created_at
+      }))
+    });
+    
+  } catch (error) {
+    console.error(' History fetch error:', error);
+    res.status(500).json({ 
+      error: 'An error occurred fetching history' 
+    });
+  }
+}
+  
+
 
 module.export= {
+  analyzeScan,
+  getScanHistory
 
 }
