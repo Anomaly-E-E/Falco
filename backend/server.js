@@ -32,7 +32,7 @@ app.get('/health', (req, res) => {
 
 // Auth routes - ALL auth endpoints start with /api/auth
 app.use('/api/auth', authRoutes);
-app.use('/api/scans', scanRoutes);;
+app.use('/api/scans', scanRoutes);
 
 
 // 404 handler

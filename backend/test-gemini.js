@@ -12,6 +12,8 @@ def get_user(user_id):
     # VULNERABLE: Direct string concatenation
     query = "SELECT * FROM users WHERE id = " + user_id
     cursor.execute(query)
+    query = "SELECT * FROM users WHERE id = " + user_id
+    cursor.execute(query)
     
     return cursor.fetchone()
 `;

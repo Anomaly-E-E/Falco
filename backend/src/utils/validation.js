@@ -53,5 +53,4 @@ function isValidEmail(email) {
     sanitizeEmail
   };
 
-  console.log('Testing validation...');
 

@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { analyzeScan, getScanHistory } = require('../controllers/scanController');
-const authMiddleware = require('../middleware/authMiddleware'); // now it's a function
+const authMiddleware = require('../Middleware/authMiddleware'); 
 
 
 /**

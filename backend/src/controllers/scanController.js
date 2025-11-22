@@ -33,7 +33,7 @@ async function analyzeScan(req, res){
 
         //Check user has credits
         const {data: user, error: userError } = await supabase
-          .from ('user')
+          .from ('users')
           .select('credits')
           .eq('id', userId)
           .single();
@@ -55,7 +55,7 @@ async function analyzeScan(req, res){
 
         //Detect Language
         const language = detectLanguage(code);
-        console.log('Detected language: ${language}');
+        console.log(`Detected language: ${language}`);
 
         if (language == 'unknown'){
           return res.status(400).json({ 
@@ -64,30 +64,29 @@ async function analyzeScan(req, res){
         }
 
         //Analyze code with AI
-        console.log('Starting AI analysis...');
+        console.log(`Starting AI analysis...`);
         const vulnerabilities = await analyzeCode(code, language);
         console.log(`Found ${vulnerabilities.length} vulnerabilities!!!`);
 
         //Deduct 1 credit from user
+        const newCredits = user.credits - 1;
         const { data: updatedUser, error: updateError } = await supabase
         .from('users')
-        .update({ credits: user.credits - 1 })
+        .update({ credits: newCredits })
         .eq('id', userId)
-        .eq('credits', user.credits)
         .select('credits')
         .single();
-
-        if ( updateError || !updateError){
-          consile.log('Failed to deduct credit:', updateError);
-          return res.status(500).json({
+        
+        if (updateError || !updatedUser) {
+          console.error('Failed to deduct credit:', updateError);
+          return res.status(500).json({ 
             error: 'Failed to process scan. Credit not deducted.' 
-          })
+          });
         }
-
         console.log(`✅ Credit deducted. Remaining: ${updatedUser.credits}`);
 
         const { data: scan, error: scanError} = await supabase
-        .from(scan)
+        .from('scans')
         .insert({
             user_id: userId,
             code_length: code.length,
@@ -172,8 +171,7 @@ async function getScanHistory(req, res) {
   
 
 
-module.export= {
+module.exports = {
   analyzeScan,
   getScanHistory
-
-}
+};
